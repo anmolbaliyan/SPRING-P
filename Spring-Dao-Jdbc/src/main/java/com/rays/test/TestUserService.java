@@ -20,8 +20,8 @@ public class TestUserService {
 
 		TestUserService test = (TestUserService) context.getBean("testUserService");
 
-//		test.testAdd();
-		test.testDelete();
+		test.testAdd();
+		// test.testDelete();
 
 	}
 
