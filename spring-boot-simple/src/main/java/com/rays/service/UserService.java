@@ -19,8 +19,8 @@ public class UserService {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	public long add(UserDTO dto) {
-		long i = dao.add(dto);
-		return i;
+		long pk = dao.add(dto);
+		return pk;
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -29,9 +29,25 @@ public class UserService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
+	public void delete(long id) {
+		try {
+			UserDTO dto = findById(id);
+			dao.delete(dto);
+		} catch (RuntimeException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	@Transactional(readOnly = true)
+	public UserDTO findById(long pk) {
+		UserDTO dto = dao.findByPk(pk);
+		return dto;
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
 	public long save(UserDTO dto) {
-		long id = dto.getId();
-		if (dto.getId() != null && dto.getId() > 0) {
+		Long id = dto.getId();
+		if (id != null && id > 0) {
 			update(dto);
 		} else {
 			id = add(dto);
@@ -39,30 +55,24 @@ public class UserService {
 		return id;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
-	public UserDTO delete(long id) {
-		UserDTO deletedUser = dao.delete(id);
-		return deletedUser;
+	@Transactional(readOnly = true)
+	public List<UserDTO> search(UserDTO dto, int pageNo, int pageSize) {
+		return dao.search(dto, pageNo, pageSize);
 	}
 
 	@Transactional(readOnly = true)
-	public UserDTO findByPk(long pk) {
-		UserDTO dto = dao.findByPk(pk);
-		return dto;
-	}
-
 	public UserDTO authenticate(String login, String password) {
-		UserDTO dto = dao.authenticate(login, password);
-		return dto;
+
+		UserDTO dto = dao.findByUniqueKey("loginId", login);
+
+		if (dto != null) {
+			if (dto.getPassword().equals(password)) {
+				return dto;
+			}
+		}
+
+		return null;
+
 	}
 
-	public UserDTO findByLogin(String login) {
-		UserDTO dto = dao.findByLogin(login);
-		return dto;
-	}
-
-	public List search(UserDTO dto, int pageNo, int pageSize) {
-		List list = dao.search(dto, pageNo, pageSize);
-		return list;
-	}
 }
